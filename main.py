@@ -31,7 +31,7 @@ app.add_middleware(
 
 # Load product data
 product_list = []
-logger.info("Loading product data from product.json")
+logger.info("Loading product data from products.json")
 try:
     with open("product.json", "r", encoding="utf-8") as f:
         count = 0
@@ -45,12 +45,18 @@ try:
                 continue
         logger.info(f"Successfully loaded {count} products")
 except Exception as e:
-    logger.error(f"Failed to load product.json: {e}")
+    logger.error(f"Failed to load products.json: {e}")
 
 @app.get("/")
+@app.head("/")
 def read_root():
     logger.info("Root endpoint accessed")
     return {"status": "API is running", "products_loaded": len(product_list)}
+
+@app.get("/health")
+@app.head("/health")
+def health_check():
+    return {"status": "healthy"}
 
 @app.get("/product/{barcode}")
 def get_product(barcode: str, request: Request):
@@ -114,4 +120,14 @@ if __name__ == "__main__":
     # Get port from environment variable (Render sets this automatically)
     port = int(os.environ.get("PORT", 8000))
     logger.info(f"Starting FastAPI server on 0.0.0.0:{port}")
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    
+    # Alternative configuration for better Render compatibility
+    config = uvicorn.Config(
+        "main:app", 
+        host="0.0.0.0", 
+        port=port, 
+        reload=False,
+        access_log=True
+    )
+    server = uvicorn.Server(config)
+    server.run()
