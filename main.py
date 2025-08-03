@@ -5,6 +5,7 @@ from health_rules import health_warnings
 import json
 import logging
 import sys
+import os
 
 # Configure logging
 logging.basicConfig(
@@ -30,9 +31,9 @@ app.add_middleware(
 
 # Load product data
 product_list = []
-logger.info("Loading product data from products.json")
+logger.info("Loading product data from product.json")
 try:
-    with open("products.json", "r", encoding="utf-8") as f:
+    with open("product.json", "r", encoding="utf-8") as f:
         count = 0
         for line in f:
             try:
@@ -44,7 +45,7 @@ try:
                 continue
         logger.info(f"Successfully loaded {count} products")
 except Exception as e:
-    logger.error(f"Failed to load products.json: {e}")
+    logger.error(f"Failed to load product.json: {e}")
 
 @app.get("/")
 def read_root():
@@ -107,8 +108,10 @@ async def analyze(request: Request):
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 
-# Add at the end of your main.py file
+# Updated for Render deployment
 if __name__ == "__main__":
     import uvicorn
-    logger.info("Starting FastAPI server on 0.0.0.0:8000")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    # Get port from environment variable (Render sets this automatically)
+    port = int(os.environ.get("PORT", 8000))
+    logger.info(f"Starting FastAPI server on 0.0.0.0:{port}")
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
