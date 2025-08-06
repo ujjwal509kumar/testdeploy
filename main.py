@@ -64,7 +64,9 @@ def get_product(barcode: str, request: Request):
     logger.info(f"Product lookup request for barcode {barcode} from {client_host}")
     
     for product in product_list:
-        if product.get("code") == barcode:
+        # Check both 'code' and '_id' fields for barcode matching
+        product_code = product.get("code") or product.get("_id")
+        if product_code == barcode:
             logger.info(f"Product found for barcode {barcode}")
             return product
     
@@ -91,7 +93,7 @@ async def analyze(request: Request):
 
         return {
             "product_name": product.get("product_name", ""),
-            "barcode": product.get("code", ""),
+            "barcode": product.get("code") or product.get("_id", ""),
             "keywords": product.get("_keywords", []),
             "brand": product.get("brands", ""),
             "quantity": product.get("quantity", ""),
