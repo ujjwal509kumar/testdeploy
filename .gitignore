@@ -1,1 +1,4 @@
 products.json
+__pycache__/
+*.pyc  
+api.log
